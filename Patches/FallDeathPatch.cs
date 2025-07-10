@@ -45,3 +45,18 @@ internal class FallDeathPatch
         audioSource.spatialBlend = 1f;
     }
 }
+
+[HarmonyPatch(typeof(OutOfBoundsTrigger), nameof(OutOfBoundsTrigger.OnTriggerEnter))]
+internal class OutOfBoundsPatch
+{
+    // ReSharper disable once UnusedMember.Local
+    private static void Postfix(ref OutOfBoundsTrigger __instance, ref Collider other)
+    {
+        if (
+            (__instance.disableWhenRoundStarts && !StartOfRound.Instance.inShipPhase)
+            || !other.TryGetComponent<PlayerControllerB>(out var player)
+        )
+            return;
+        FallDeathPatch.a(player.transform.position);
+    }
+}
