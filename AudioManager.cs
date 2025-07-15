@@ -42,6 +42,22 @@ public static class AudioManager
         PlaySingleClipOn(clip, audioSource, audioSourceObject);
     }
 
+    public static void PlaySingleClipInside(
+        AudioClip clip,
+        Action<AudioSource>? audioSourceModifier = null,
+        bool inside = true
+    )
+    {
+        CreateAudioSource(Vector3.zero, null, out var audioSource, out var audioSourceObject);
+        audioSourceModifier?.Invoke(audioSource);
+        PlaySingleClipOnWhen(clip, audioSource, audioSourceObject, (_) => IsLocalPlayer(inside));
+    }
+
+    private static bool IsLocalPlayer(bool inside) =>
+        GameNetworkManager.Instance != null
+        && GameNetworkManager.Instance.localPlayerController != null
+        && GameNetworkManager.Instance.localPlayerController.isInsideFactory == inside;
+
     internal static void CreateAudioSource(
         Vector3 origin,
         Transform? parentTo,
@@ -79,12 +95,40 @@ public static class AudioManager
         );
     }
 
+    public static void PlaySingleClipOnWhen(
+        AudioClip clip,
+        AudioSource audioSource,
+        GameObject audioSourceObject,
+        Func<AudioSource, bool> predicate
+    )
+    {
+        audioSource.PlayOneShot(clip);
+        MySoundReplacements.Instance.StartCoroutine(
+            _CleanUpAfterPlayingAudioWhen(audioSource, audioSourceObject, predicate)
+        );
+    }
+
     private static IEnumerator _CleanUpAfterPlayingAudio(
         AudioSource audioSource,
         GameObject cleanUp
     )
     {
         yield return new WaitUntil(() => !audioSource.isPlaying);
+        Object.Destroy(cleanUp);
+    }
+
+    private static IEnumerator _CleanUpAfterPlayingAudioWhen(
+        AudioSource audioSource,
+        GameObject cleanUp,
+        Func<AudioSource, bool> predicate
+    )
+    {
+        var volume = audioSource.volume;
+        while (audioSource.isPlaying)
+        {
+            audioSource.volume = predicate(audioSource) ? volume : 0f;
+            yield return null;
+        }
         Object.Destroy(cleanUp);
     }
 
