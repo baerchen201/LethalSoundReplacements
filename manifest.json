@@ -1,7 +1,7 @@
 {
   "name": "SoundReplacements",
-  "version_number": "1.1.0",
+  "version_number": "1.2.0",
   "website_url": "https://github.com/baerchen201/LethalSoundReplacements",
-  "description": "Sound replacements for personal use",
+  "description": "Sound replacements and additions for personal use",
   "dependencies": ["BepInEx-BepInExPack-5.4.2100"]
 }
