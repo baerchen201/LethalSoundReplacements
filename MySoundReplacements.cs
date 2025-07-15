@@ -23,6 +23,9 @@ public class MySoundReplacements : BaseUnityPlugin
     private const string FREDDY_FAZBEAR = "music box.wav";
     internal AudioClip? freddyFazbear;
 
+    private const string EYE_SCREAM = "eye scream.ogg";
+    internal AudioClip? eyeScream;
+
     private void Awake()
     {
         Logger = base.Logger;
@@ -43,6 +46,7 @@ public class MySoundReplacements : BaseUnityPlugin
         Logger.LogDebug("Loading sounds...");
         fallDeath = AudioManager.LoadSound(rel(FALL_DEATH));
         freddyFazbear = AudioManager.LoadSound(rel(FREDDY_FAZBEAR));
+        eyeScream = AudioManager.LoadSound(rel(EYE_SCREAM));
         Logger.LogDebug("Finished loading sounds!");
 
         Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
