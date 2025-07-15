@@ -19,7 +19,10 @@ public class MySoundReplacements : BaseUnityPlugin
     public bool LoadIntoRAM => loadIntoRAM.Value;
 
     private const string FALL_DEATH = "fall.ogg";
-    internal AudioClip? fallDeath = null;
+    internal AudioClip? fallDeath;
+
+    private const string FREDDY_FAZBEAR = "music box.wav";
+    internal AudioClip? freddyFazbear;
 
     private void Awake()
     {
@@ -40,6 +43,7 @@ public class MySoundReplacements : BaseUnityPlugin
 
         Logger.LogDebug("Loading sounds...");
         fallDeath = AudioManager.LoadSound(rel(FALL_DEATH));
+        freddyFazbear = AudioManager.LoadSound(rel(FREDDY_FAZBEAR));
         Logger.LogDebug("Finished loading sounds!");
 
         Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");

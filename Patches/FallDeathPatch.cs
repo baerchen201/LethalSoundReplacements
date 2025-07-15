@@ -29,12 +29,12 @@ internal class FallDeathPatch
     internal static void a(Vector3 origin, Transform? parentTo = null)
     {
         var audioClip = MySoundReplacements.Instance.fallDeath;
-        if (!audioClip)
+        if (audioClip == null)
             return;
         if (parentTo)
-            AudioManager.PlaySingleClipAt(audioClip!, parentTo!, b);
+            AudioManager.PlaySingleClipAt(audioClip, parentTo!, b);
         else
-            AudioManager.PlaySingleClipAt(audioClip!, origin, null, b);
+            AudioManager.PlaySingleClipAt(audioClip, origin, null, b);
     }
 
     internal static void b(AudioSource audioSource)

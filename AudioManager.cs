@@ -32,6 +32,16 @@ public static class AudioManager
         PlaySingleClipOn(clip, audioSource, audioSourceObject);
     }
 
+    public static void PlaySingleClipGlobal(
+        AudioClip clip,
+        Action<AudioSource>? audioSourceModifier = null
+    )
+    {
+        CreateAudioSource(Vector3.zero, null, out var audioSource, out var audioSourceObject);
+        audioSourceModifier?.Invoke(audioSource);
+        PlaySingleClipOn(clip, audioSource, audioSourceObject);
+    }
+
     internal static void CreateAudioSource(
         Vector3 origin,
         Transform? parentTo,
