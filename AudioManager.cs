@@ -113,8 +113,9 @@ public static class AudioManager
         GameObject cleanUp
     )
     {
-        yield return new WaitUntil(() => !audioSource.isPlaying);
-        Object.Destroy(cleanUp);
+        yield return new WaitUntil(() => !audioSource || !audioSource.isPlaying);
+        if (cleanUp)
+            Object.Destroy(cleanUp);
     }
 
     private static IEnumerator _CleanUpAfterPlayingAudioWhen(
@@ -124,12 +125,13 @@ public static class AudioManager
     )
     {
         var volume = audioSource.volume;
-        while (audioSource.isPlaying)
+        while (audioSource && audioSource.isPlaying)
         {
             audioSource.volume = predicate(audioSource) ? volume : 0f;
             yield return null;
         }
-        Object.Destroy(cleanUp);
+        if (cleanUp)
+            Object.Destroy(cleanUp);
     }
 
     public static AudioClip? LoadSound(string path)
