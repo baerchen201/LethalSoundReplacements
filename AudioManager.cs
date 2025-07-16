@@ -50,7 +50,7 @@ public static class AudioManager
     {
         CreateAudioSource(Vector3.zero, null, out var audioSource, out var audioSourceObject);
         audioSourceModifier?.Invoke(audioSource);
-        PlaySingleClipOnWhen(clip, audioSource, audioSourceObject, (_) => IsLocalPlayer(inside));
+        PlaySingleClipOnWhen(clip, audioSource, audioSourceObject, _ => IsLocalPlayer(inside));
     }
 
     private static bool IsLocalPlayer(bool inside) =>

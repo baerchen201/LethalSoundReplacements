@@ -1,24 +1,17 @@
-using System.Collections;
 using HarmonyLib;
 using UnityEngine;
 
 namespace MySoundReplacements.Patches;
 
-[HarmonyPatch(typeof(LungProp), nameof(LungProp.DisconnectFromMachinery))]
+[HarmonyPatch(typeof(HUDManager), nameof(HUDManager.RadiationWarningHUD))]
 public class LightOffPatch
 {
     // ReSharper disable once UnusedMember.Local
-    private static void Postfix(ref LungProp __instance)
+    private static void Postfix()
     {
-        __instance.roundManager.StartCoroutine(a());
-    }
-
-    private static IEnumerator a()
-    {
-        var audioClip = MySoundReplacements.Instance.freddyFazbear;
+        var audioClip = MySoundReplacements.Sounds.FreddyFazbear;
         if (audioClip == null)
-            yield break;
-        yield return new WaitForSeconds(3f);
+            return;
         AudioManager.PlaySingleClipInside(audioClip, audioSource => audioSource.volume = 0.75f);
         AudioManager.PlaySingleClipInside(
             audioClip,

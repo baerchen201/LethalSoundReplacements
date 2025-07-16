@@ -17,14 +17,30 @@ public class MySoundReplacements : BaseUnityPlugin
     internal ConfigEntry<bool> loadIntoRAM = null!;
     public bool LoadIntoRAM => loadIntoRAM.Value;
 
-    private const string FALL_DEATH = "fall.ogg";
-    internal AudioClip? fallDeath;
+    private ConfigEntry<bool>? fallDeathEnable;
+    private AudioClip? fallDeath;
 
-    private const string FREDDY_FAZBEAR = "music box.wav";
-    internal AudioClip? freddyFazbear;
+    private ConfigEntry<bool>? freddyFazbearEnable;
+    private AudioClip? freddyFazbear;
 
-    private const string EYE_SCREAM = "eye scream.ogg";
-    internal AudioClip? eyeScream;
+    private ConfigEntry<bool>? eyeScreamEnable;
+    private AudioClip? eyeScream;
+
+    public static class Sounds
+    {
+        internal static bool FallDeathEnable => Instance is { fallDeathEnable.Value: true };
+        internal const string FALL_DEATH = "fall.ogg";
+        public static AudioClip? FallDeath => FallDeathEnable ? Instance.fallDeath : null;
+
+        internal static bool FreddyFazbearEnable => Instance is { freddyFazbearEnable.Value: true };
+        internal const string FREDDY_FAZBEAR = "music box.wav";
+        public static AudioClip? FreddyFazbear =>
+            FreddyFazbearEnable ? Instance.freddyFazbear : null;
+
+        internal static bool EyeScreamEnable => Instance is { eyeScreamEnable.Value: true };
+        internal const string EYE_SCREAM = "eye scream.ogg";
+        public static AudioClip? EyeScream => EyeScreamEnable ? Instance.eyeScream : null;
+    }
 
     private void Awake()
     {
@@ -38,15 +54,34 @@ public class MySoundReplacements : BaseUnityPlugin
             "Loads the sounds into RAM instead of streaming from disk"
         );
 
+        fallDeathEnable = Config.Bind(
+            "Sounds",
+            "FallDeath",
+            true,
+            "Adds scream sound effect on death by Gravity or OutOfBoundsTrigger"
+        );
+        freddyFazbearEnable = Config.Bind(
+            "Sounds",
+            "FreddyFazbear",
+            true,
+            "Adds Five Nights at Freddys game over music when pulling apparatus"
+        );
+        eyeScreamEnable = Config.Bind(
+            "Sounds",
+            "EyeScream",
+            true,
+            "Replaces MouthDog anger sound with Eye Of Cthulhu from Terraria"
+        );
+
         Harmony ??= new Harmony(MyPluginInfo.PLUGIN_GUID);
         Logger.LogDebug("Patching...");
         Harmony.PatchAll();
         Logger.LogDebug("Finished patching!");
 
         Logger.LogDebug("Loading sounds...");
-        fallDeath = AudioManager.LoadSound(rel(FALL_DEATH));
-        freddyFazbear = AudioManager.LoadSound(rel(FREDDY_FAZBEAR));
-        eyeScream = AudioManager.LoadSound(rel(EYE_SCREAM));
+        fallDeath = AudioManager.LoadSound(rel(Sounds.FALL_DEATH));
+        freddyFazbear = AudioManager.LoadSound(rel(Sounds.FREDDY_FAZBEAR));
+        eyeScream = AudioManager.LoadSound(rel(Sounds.EYE_SCREAM));
         Logger.LogDebug("Finished loading sounds!");
 
         Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
