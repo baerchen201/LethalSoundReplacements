@@ -26,6 +26,9 @@ public class MySoundReplacements : BaseUnityPlugin
     private ConfigEntry<bool>? eyeScreamEnable;
     private AudioClip? eyeScream;
 
+    private ConfigEntry<bool>? mimicDeathEnable;
+    private AudioClip? mimicDeath;
+
     public static class Sounds
     {
         internal static bool FallDeathEnable => Instance is { fallDeathEnable.Value: true };
@@ -40,6 +43,10 @@ public class MySoundReplacements : BaseUnityPlugin
         internal static bool EyeScreamEnable => Instance is { eyeScreamEnable.Value: true };
         internal const string EYE_SCREAM = "eye scream.ogg";
         public static AudioClip? EyeScream => EyeScreamEnable ? Instance.eyeScream : null;
+
+        internal static bool MimicDeathEnable => Instance is { mimicDeathEnable.Value: true };
+        internal const string MIMIC_DEATH = "mimicDeath.wav";
+        public static AudioClip? MimicDeath => MimicDeathEnable ? Instance.mimicDeath : null;
     }
 
     private void Awake()
@@ -73,6 +80,13 @@ public class MySoundReplacements : BaseUnityPlugin
             "Replaces MouthDog anger sound with Eye Of Cthulhu from Terraria"
         );
 
+        mimicDeathEnable = Config.Bind(
+            "Sounds",
+            "MimicDeath",
+            true,
+            "Adds the Mimic death sound with The MIMIICCCC (MR BEASTTTT) (no CLICKBAIT) (REAL!!!!!!) meme from Five Nights at Freddy's"
+        );
+
         Harmony ??= new Harmony(MyPluginInfo.PLUGIN_GUID);
         Logger.LogDebug("Patching...");
         Harmony.PatchAll();
@@ -82,6 +96,7 @@ public class MySoundReplacements : BaseUnityPlugin
         fallDeath = AudioManager.LoadSound(rel(Sounds.FALL_DEATH));
         freddyFazbear = AudioManager.LoadSound(rel(Sounds.FREDDY_FAZBEAR));
         eyeScream = AudioManager.LoadSound(rel(Sounds.EYE_SCREAM));
+        mimicDeath = AudioManager.LoadSound(rel(Sounds.MIMIC_DEATH));
         Logger.LogDebug("Finished loading sounds!");
 
         Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
