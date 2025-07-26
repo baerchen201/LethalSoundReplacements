@@ -3,5 +3,8 @@
   "version_number": "1.4.0",
   "website_url": "https://github.com/baerchen201/LethalSoundReplacements",
   "description": "Sound replacements and additions for personal use",
-  "dependencies": ["BepInEx-BepInExPack-5.4.2100"]
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100",
+    "baer1-CustomBoomboxMusic-2.1.0"
+  ]
 }
