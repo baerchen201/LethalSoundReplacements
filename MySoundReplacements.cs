@@ -79,7 +79,6 @@ public class MySoundReplacements : BaseUnityPlugin
             true,
             "Replaces MouthDog anger sound with Eye Of Cthulhu from Terraria"
         );
-
         mimicDeathEnable = Config.Bind(
             "Sounds",
             "MimicDeath",
