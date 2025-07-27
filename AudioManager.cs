@@ -76,6 +76,31 @@ public static class AudioManager
         PlayLoopingClipOn(clip, audioSource, audioSourceObject);
     }
 
+    public static void PlayLoopingClipAtWhile(
+        AudioClip clip,
+        Func<AudioSource, bool> predicate,
+        Vector3 origin,
+        Transform? parentTo = null,
+        Action<AudioSource>? audioSourceModifier = null
+    )
+    {
+        CreateAudioSource(origin, parentTo, out var audioSource, out var audioSourceObject);
+        audioSourceModifier?.Invoke(audioSource);
+        PlayLoopingClipOnWhile(clip, audioSource, audioSourceObject, predicate);
+    }
+
+    public static void PlayLoopingClipAtWhile(
+        AudioClip clip,
+        Func<AudioSource, bool> predicate,
+        Transform origin,
+        Action<AudioSource>? audioSourceModifier = null
+    )
+    {
+        CreateAudioSource(origin, out var audioSource, out var audioSourceObject);
+        audioSourceModifier?.Invoke(audioSource);
+        PlayLoopingClipOnWhile(clip, audioSource, audioSourceObject, predicate);
+    }
+
     public static void PlayLoopingClipGlobal(
         AudioClip clip,
         Action<AudioSource>? audioSourceModifier = null
@@ -94,7 +119,7 @@ public static class AudioManager
     {
         CreateAudioSource(Vector3.zero, null, out var audioSource, out var audioSourceObject);
         audioSourceModifier?.Invoke(audioSource);
-        PlayLoopingClipOnWhen(clip, audioSource, audioSourceObject, _ => IsLocalPlayer(inside));
+        PlayLoopingClipOnWhile(clip, audioSource, audioSourceObject, _ => IsLocalPlayer(inside));
     }
 
     private static bool IsLocalPlayer(bool inside) =>
@@ -166,7 +191,7 @@ public static class AudioManager
         );
     }
 
-    public static void PlayLoopingClipOnWhen(
+    public static void PlayLoopingClipOnWhile(
         AudioClip clip,
         AudioSource audioSource,
         GameObject audioSourceObject,
@@ -177,7 +202,7 @@ public static class AudioManager
         audioSource.loop = true;
         audioSource.Play();
         MySoundReplacements.Instance.StartCoroutine(
-            _CleanUpAfterPlayingAudioWhen(audioSource, audioSourceObject, predicate)
+            _CleanUpAfterPlayingLoopingAudioWhen(audioSource, audioSourceObject, predicate)
         );
     }
 
@@ -203,6 +228,18 @@ public static class AudioManager
             audioSource.volume = predicate(audioSource) ? volume : 0f;
             yield return null;
         }
+        if (cleanUp)
+            Object.Destroy(cleanUp);
+    }
+
+    private static IEnumerator _CleanUpAfterPlayingLoopingAudioWhen(
+        AudioSource audioSource,
+        GameObject cleanUp,
+        Func<AudioSource, bool> predicate
+    )
+    {
+        while (audioSource && audioSource.isPlaying && predicate(audioSource))
+            yield return null;
         if (cleanUp)
             Object.Destroy(cleanUp);
     }
