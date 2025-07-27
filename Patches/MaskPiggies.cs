@@ -1,58 +1,44 @@
-using System.Collections;
-using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
 
-namespace MySoundReplacements.Patches
+namespace MySoundReplacements.Patches;
+
+[HarmonyPatch(typeof(ButlerBeesEnemyAI), nameof(ButlerBeesEnemyAI.Start))]
+public static class MaskPiggiesPatch
 {
-    [HarmonyPatch(typeof(ButlerBeesEnemyAI), nameof(ButlerBeesEnemyAI.DoAIInterval))]
-    public static class MaskPiggiesPatch
+    // ReSharper disable once UnusedMember.Local
+    private static void Postfix(ref ButlerBeesEnemyAI __instance)
     {
-        private static readonly ConditionalWeakTable<ButlerBeesEnemyAI, PlayedState> _playedTable =
-            new();
-
-        private class PlayedState
+        var clip = MySoundReplacements.Sounds.MaskPiggies;
+        if (!__instance.buzzing || clip == null)
         {
-            public bool hasSwappedAndPlayed = false;
+            MySoundReplacements.Logger.LogWarning(
+                $"Couldn't replace AudioClip on Mask Hornets: {__instance} AudioSource:{__instance.buzzing} AudioClip:{clip}"
+            );
+            return;
         }
 
-        private static void Prefix(ButlerBeesEnemyAI __instance)
-        {
-            if (__instance.buzzing == null || MySoundReplacements.Sounds.MaskPiggies == null)
-                return;
-
-            var state = _playedTable.GetOrCreateValue(__instance);
-
-            if (!state.hasSwappedAndPlayed)
-            {
-                var source = __instance.buzzing;
-                source.clip = MySoundReplacements.Sounds.MaskPiggies;
-                source.loop = true;
-                __instance.buzzing.volume = 0.15f;
-                source.Play();
-
-                state.hasSwappedAndPlayed = true;
-                MySoundReplacements.Logger.LogDebug(
-                    "🐝 MaskPiggies: sound swapped and played once."
-                );
-            }
-
-            // ✅ Start coroutine from the enemy instance
-            __instance.StartCoroutine(ResetPitchNextFrame(__instance));
-        }
-
-        private static IEnumerator ResetPitchNextFrame(ButlerBeesEnemyAI instance)
-        {
-            yield return null; // wait until end of frame
-            if (
-                instance != null
-                && instance.buzzing != null
-                && instance.buzzing.clip == MySoundReplacements.Sounds.MaskPiggies
-            )
-            {
-                instance.buzzing.pitch = 1f;
-                MySoundReplacements.Logger.LogDebug("🐝 Pitch forced back to 1f (delayed).");
-            }
-        }
+        __instance.buzzing.clip = clip;
+        __instance.buzzing.Play();
     }
+}
+
+[HarmonyPatch(typeof(ButlerBeesEnemyAI), nameof(ButlerBeesEnemyAI.DoAIInterval))]
+public static class MaskPiggiesPitchPatch
+{
+    // ReSharper disable once UnusedMember.Local
+    private static IEnumerable<CodeInstruction> Transpiler(
+        IEnumerable<CodeInstruction> instructions
+    ) =>
+        instructions.Select(i =>
+            ReferenceEquals(
+                i.operand,
+                AccessTools.PropertySetter(typeof(AudioSource), nameof(AudioSource.pitch))
+            )
+                ? new CodeInstruction(OpCodes.Pop)
+                : i
+        );
 }
