@@ -29,6 +29,9 @@ public class MySoundReplacements : BaseUnityPlugin
     private ConfigEntry<bool>? mimicDeathEnable;
     private AudioClip? mimicDeath;
 
+    private ConfigEntry<bool>? goofyCrashEnable;
+    private AudioClip? goofyCrash;
+
     public static class Sounds
     {
         internal static bool FallDeathEnable => Instance is { fallDeathEnable.Value: true };
@@ -47,6 +50,10 @@ public class MySoundReplacements : BaseUnityPlugin
         internal static bool MimicDeathEnable => Instance is { mimicDeathEnable.Value: true };
         internal const string MIMIC_DEATH = "mimicDeath.wav";
         public static AudioClip? MimicDeath => MimicDeathEnable ? Instance.mimicDeath : null;
+
+        internal static bool GoofyCrashEnable => Instance is { goofyCrashEnable.Value: true };
+        internal const string GOOFY_CRASH = "goofyCrash.wav";
+        public static AudioClip? GoofyCrash => GoofyCrashEnable ? Instance.goofyCrash : null;
     }
 
     private void Awake()
@@ -85,6 +92,12 @@ public class MySoundReplacements : BaseUnityPlugin
             true,
             "Adds the Mimic death sound with The MIMIICCCC (MR BEASTTTT) (no CLICKBAIT) (REAL!!!!!!) meme from Five Nights at Freddy's"
         );
+        goofyCrashEnable = Config.Bind(
+            "Sounds",
+            "GoofyCrash",
+            true,
+            "Replaces the cruiser crash sound with Goofy dying while listening to Post Malone (RIP)"
+        );
 
         Harmony ??= new Harmony(MyPluginInfo.PLUGIN_GUID);
         Logger.LogDebug("Patching...");
@@ -96,6 +109,7 @@ public class MySoundReplacements : BaseUnityPlugin
         freddyFazbear = AudioManager.LoadSound(rel(Sounds.FREDDY_FAZBEAR));
         eyeScream = AudioManager.LoadSound(rel(Sounds.EYE_SCREAM));
         mimicDeath = AudioManager.LoadSound(rel(Sounds.MIMIC_DEATH));
+        goofyCrash = AudioManager.LoadSound(rel(Sounds.GOOFY_CRASH));
         Logger.LogDebug("Finished loading sounds!");
 
         Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
