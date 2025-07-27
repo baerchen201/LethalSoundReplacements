@@ -28,6 +28,7 @@ namespace MySoundReplacements.Patches
                 var source = __instance.buzzing;
                 source.clip = MySoundReplacements.Sounds.MaskPiggies;
                 source.loop = true;
+                __instance.buzzing.volume = 0.15f;
                 source.Play();
 
                 state.hasSwappedAndPlayed = true;
