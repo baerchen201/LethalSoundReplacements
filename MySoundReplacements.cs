@@ -32,6 +32,9 @@ public class MySoundReplacements : BaseUnityPlugin
     private ConfigEntry<bool>? goofyCrashEnable;
     private AudioClip? goofyCrash;
 
+    private ConfigEntry<bool>? maskPiggiesEnable;
+    private AudioClip? maskPiggies;
+
     public static class Sounds
     {
         internal static bool FallDeathEnable => Instance is { fallDeathEnable.Value: true };
@@ -54,6 +57,10 @@ public class MySoundReplacements : BaseUnityPlugin
         internal static bool GoofyCrashEnable => Instance is { goofyCrashEnable.Value: true };
         internal const string GOOFY_CRASH = "goofyCrash.wav";
         public static AudioClip? GoofyCrash => GoofyCrashEnable ? Instance.goofyCrash : null;
+
+        internal static bool MaskPiggiesEnable => Instance is { maskPiggiesEnable.Value: true };
+        internal const string MASK_PIGGIES = "maskPiggies.wav";
+        public static AudioClip? MaskPiggies => MaskPiggiesEnable ? Instance.maskPiggies : null;
     }
 
     private void Awake()
@@ -98,6 +105,12 @@ public class MySoundReplacements : BaseUnityPlugin
             true,
             "Replaces the cruiser crash sound with Goofy dying while listening to Post Malone (RIP)"
         );
+        maskPiggiesEnable = Config.Bind(
+            "Sounds",
+            "MaskPiggies",
+            true,
+            "Replaces the Mask Hornets sound with the Bad Piggies theme from Angry Birds (the piggies are pretty bad)"
+        );
 
         Harmony ??= new Harmony(MyPluginInfo.PLUGIN_GUID);
         Logger.LogDebug("Patching...");
@@ -110,6 +123,7 @@ public class MySoundReplacements : BaseUnityPlugin
         eyeScream = AudioManager.LoadSound(rel(Sounds.EYE_SCREAM));
         mimicDeath = AudioManager.LoadSound(rel(Sounds.MIMIC_DEATH));
         goofyCrash = AudioManager.LoadSound(rel(Sounds.GOOFY_CRASH));
+        maskPiggies = AudioManager.LoadSound(rel(Sounds.MASK_PIGGIES));
         Logger.LogDebug("Finished loading sounds!");
 
         Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
