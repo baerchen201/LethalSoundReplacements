@@ -8,10 +8,11 @@ public class GoofyCrashPatch
 {
     private static void Prefix(ref VehicleController __instance)
     {
-        if (!__instance.carDestroyed)
+        var clip = MySoundReplacements.Sounds.GoofyCrash;
+        if (!__instance.carDestroyed && clip != null)
         {
             AudioManager.PlaySingleClipAt(
-                MySoundReplacements.Sounds.GoofyCrash,
+                clip,
                 __instance.transform,
                 audioSource =>
                 {
