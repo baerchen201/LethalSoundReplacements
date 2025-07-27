@@ -1,38 +1,25 @@
 using HarmonyLib;
 using UnityEngine;
 
-namespace MySoundReplacements.Patches
+namespace MySoundReplacements.Patches;
+
+[HarmonyPatch(typeof(VehicleController), nameof(VehicleController.DestroyCar))]
+public class GoofyCrashPatch
 {
-    [HarmonyPatch(typeof(VehicleController))]
-    [HarmonyPatch("CarReactToObstacle")]
-    [HarmonyPatch(
-        new[]
-        {
-            typeof(Vector3),
-            typeof(Vector3),
-            typeof(Vector3),
-            typeof(CarObstacleType),
-            typeof(float),
-            typeof(EnemyAI),
-            typeof(bool),
-        }
-    )]
-    public static class GoofyCrashPatch
+    private static void Prefix(ref VehicleController __instance)
     {
-        private static void Prefix(CarObstacleType type, Vector3 position)
+        if (!__instance.carDestroyed)
         {
-            // Only play the sound for specific crash types if you want
-            if (type == CarObstacleType.Player || type == CarObstacleType.Object)
-            {
-                var audio = MySoundReplacements.Instance.GetComponent<AudioSource>();
-                if (MySoundReplacements.Sounds.GoofyCrash != null && audio != null)
+            AudioManager.PlaySingleClipAt(
+                MySoundReplacements.Sounds.GoofyCrash,
+                __instance.transform,
+                audioSource =>
                 {
-                    audio.PlayOneShot(MySoundReplacements.Sounds.GoofyCrash);
-                    MySoundReplacements.Logger.LogDebug(
-                        "Played GoofyCrash.wav in CarReactToObstacle"
-                    );
+                    audioSource.maxDistance = 50f;
+                    audioSource.rolloffMode = AudioRolloffMode.Linear;
+                    audioSource.spatialBlend = 1f;
                 }
-            }
+            );
         }
     }
 }
