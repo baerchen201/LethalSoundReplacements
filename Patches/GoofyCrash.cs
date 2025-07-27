@@ -6,6 +6,7 @@ namespace MySoundReplacements.Patches;
 [HarmonyPatch(typeof(VehicleController), nameof(VehicleController.DestroyCar))]
 public class GoofyCrashPatch
 {
+    // ReSharper disable once UnusedMember.Local
     private static void Prefix(ref VehicleController __instance)
     {
         var clip = MySoundReplacements.Sounds.GoofyCrash;
