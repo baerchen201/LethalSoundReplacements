@@ -53,6 +53,50 @@ public static class AudioManager
         PlaySingleClipOnWhen(clip, audioSource, audioSourceObject, _ => IsLocalPlayer(inside));
     }
 
+    public static void PlayLoopingClipAt(
+        AudioClip clip,
+        Vector3 origin,
+        Transform? parentTo = null,
+        Action<AudioSource>? audioSourceModifier = null
+    )
+    {
+        CreateAudioSource(origin, parentTo, out var audioSource, out var audioSourceObject);
+        audioSourceModifier?.Invoke(audioSource);
+        PlayLoopingClipOn(clip, audioSource, audioSourceObject);
+    }
+
+    public static void PlayLoopingClipAt(
+        AudioClip clip,
+        Transform origin,
+        Action<AudioSource>? audioSourceModifier = null
+    )
+    {
+        CreateAudioSource(origin, out var audioSource, out var audioSourceObject);
+        audioSourceModifier?.Invoke(audioSource);
+        PlayLoopingClipOn(clip, audioSource, audioSourceObject);
+    }
+
+    public static void PlayLoopingClipGlobal(
+        AudioClip clip,
+        Action<AudioSource>? audioSourceModifier = null
+    )
+    {
+        CreateAudioSource(Vector3.zero, null, out var audioSource, out var audioSourceObject);
+        audioSourceModifier?.Invoke(audioSource);
+        PlayLoopingClipOn(clip, audioSource, audioSourceObject);
+    }
+
+    public static void PlayLoopingClipInside(
+        AudioClip clip,
+        Action<AudioSource>? audioSourceModifier = null,
+        bool inside = true
+    )
+    {
+        CreateAudioSource(Vector3.zero, null, out var audioSource, out var audioSourceObject);
+        audioSourceModifier?.Invoke(audioSource);
+        PlayLoopingClipOnWhen(clip, audioSource, audioSourceObject, _ => IsLocalPlayer(inside));
+    }
+
     private static bool IsLocalPlayer(bool inside) =>
         GameNetworkManager.Instance != null
         && GameNetworkManager.Instance.localPlayerController != null
@@ -103,6 +147,35 @@ public static class AudioManager
     )
     {
         audioSource.PlayOneShot(clip);
+        MySoundReplacements.Instance.StartCoroutine(
+            _CleanUpAfterPlayingAudioWhen(audioSource, audioSourceObject, predicate)
+        );
+    }
+
+    public static void PlayLoopingClipOn(
+        AudioClip clip,
+        AudioSource audioSource,
+        GameObject audioSourceObject
+    )
+    {
+        audioSource.clip = clip;
+        audioSource.loop = true;
+        audioSource.Play();
+        MySoundReplacements.Instance.StartCoroutine(
+            _CleanUpAfterPlayingAudio(audioSource, audioSourceObject)
+        );
+    }
+
+    public static void PlayLoopingClipOnWhen(
+        AudioClip clip,
+        AudioSource audioSource,
+        GameObject audioSourceObject,
+        Func<AudioSource, bool> predicate
+    )
+    {
+        audioSource.clip = clip;
+        audioSource.loop = true;
+        audioSource.Play();
         MySoundReplacements.Instance.StartCoroutine(
             _CleanUpAfterPlayingAudioWhen(audioSource, audioSourceObject, predicate)
         );
