@@ -35,6 +35,9 @@ public class MySoundReplacements : BaseUnityPlugin
     private ConfigEntry<bool>? maskPiggiesEnable;
     private AudioClip? maskPiggies;
 
+    private ConfigEntry<bool>? birdSuckerEnable;
+    private AudioClip? birdSucker;
+
     public static class Sounds
     {
         internal static bool FallDeathEnable => Instance is { fallDeathEnable.Value: true };
@@ -61,6 +64,10 @@ public class MySoundReplacements : BaseUnityPlugin
         internal static bool MaskPiggiesEnable => Instance is { maskPiggiesEnable.Value: true };
         internal const string MASK_PIGGIES = "maskPiggies.wav";
         public static AudioClip? MaskPiggies => MaskPiggiesEnable ? Instance.maskPiggies : null;
+
+        internal static bool BirdSuckerEnable => Instance is { birdSuckerEnable.Value: true };
+        internal const string BIRD_SUCKER = "birdSucker.wav";
+        public static AudioClip? BirdSucker => BirdSuckerEnable ? Instance.birdSucker : null;
     }
 
     private void Awake()
@@ -111,6 +118,12 @@ public class MySoundReplacements : BaseUnityPlugin
             true,
             "Replaces the Mask Hornets sound with the Bad Piggies theme from Angry Birds (the piggies are pretty bad)"
         );
+        birdSuckerEnable = Config.Bind(
+            "Sounds",
+            "BirdSucker",
+            true,
+            "Replaces the Sapsucker (Giant Kiwi) chase sound with the Angry Birds theme (the birds are pretty angry)"
+        );
 
         Harmony ??= new Harmony(MyPluginInfo.PLUGIN_GUID);
         Logger.LogDebug("Patching...");
@@ -124,6 +137,7 @@ public class MySoundReplacements : BaseUnityPlugin
         mimicDeath = AudioManager.LoadSound(rel(Sounds.MIMIC_DEATH));
         goofyCrash = AudioManager.LoadSound(rel(Sounds.GOOFY_CRASH));
         maskPiggies = AudioManager.LoadSound(rel(Sounds.MASK_PIGGIES));
+        birdSucker = AudioManager.LoadSound(rel(Sounds.BIRD_SUCKER));
         Logger.LogDebug("Finished loading sounds!");
 
         Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
