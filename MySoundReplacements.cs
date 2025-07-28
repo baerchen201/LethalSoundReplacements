@@ -38,6 +38,9 @@ public class MySoundReplacements : BaseUnityPlugin
     private ConfigEntry<bool>? redSuckerEnable;
     private AudioClip? redSucker;
 
+    private ConfigEntry<bool>? typeMicroEnable;
+    private AudioClip? typeMicro;
+
     public static class Sounds
     {
         internal static bool FallDeathEnable => Instance is { fallDeathEnable.Value: true };
@@ -68,6 +71,10 @@ public class MySoundReplacements : BaseUnityPlugin
         internal static bool RedSuckerEnable => Instance is { redSuckerEnable.Value: true };
         internal const string RED_SUCKER = "redSucker.wav";
         public static AudioClip? RedSucker => RedSuckerEnable ? Instance.redSucker : null;
+
+        internal static bool TypeMicroEnable => Instance is { typeMicroEnable.Value: true };
+        internal const string TYPE_MICRO = "typeMicro.ogg";
+        public static AudioClip? TypeMicro => TypeMicroEnable ? Instance.typeMicro : null;
     }
 
     private void Awake()
@@ -124,6 +131,12 @@ public class MySoundReplacements : BaseUnityPlugin
             true,
             "Replaces the Sapsucker scream sound with the sound of Red from Angry Birds screaming (ya hooya!)"
         );
+        typeMicroEnable = Config.Bind(
+            "Sounds",
+            "TypeMicro",
+            true,
+            "Replaces the microwave item sound when turned on with THE microwave type beat (MMMMMMMMMMMMMMM)"
+        );
 
         Harmony ??= new Harmony(MyPluginInfo.PLUGIN_GUID);
         Logger.LogDebug("Patching...");
@@ -138,6 +151,7 @@ public class MySoundReplacements : BaseUnityPlugin
         goofyCrash = AudioManager.LoadSound(rel(Sounds.GOOFY_CRASH));
         maskPiggies = AudioManager.LoadSound(rel(Sounds.MASK_PIGGIES));
         redSucker = AudioManager.LoadSound(rel(Sounds.RED_SUCKER));
+        typeMicro = AudioManager.LoadSound(rel(Sounds.TYPE_MICRO));
         Logger.LogDebug("Finished loading sounds!");
 
         Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
