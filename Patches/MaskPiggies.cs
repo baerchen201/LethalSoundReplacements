@@ -25,20 +25,3 @@ public static class MaskPiggiesPatch
         __instance.buzzing.Play();
     }
 }
-
-[HarmonyPatch(typeof(ButlerBeesEnemyAI), nameof(ButlerBeesEnemyAI.DoAIInterval))]
-public static class MaskPiggiesPitchPatch
-{
-    // ReSharper disable once UnusedMember.Local
-    private static IEnumerable<CodeInstruction> Transpiler(
-        IEnumerable<CodeInstruction> instructions
-    ) =>
-        instructions.Select(i =>
-            ReferenceEquals(
-                i.operand,
-                AccessTools.PropertySetter(typeof(AudioSource), nameof(AudioSource.pitch))
-            )
-                ? new CodeInstruction(OpCodes.Pop)
-                : i
-        );
-}

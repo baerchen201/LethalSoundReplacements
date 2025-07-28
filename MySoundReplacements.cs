@@ -35,6 +35,9 @@ public class MySoundReplacements : BaseUnityPlugin
     private ConfigEntry<bool>? maskPiggiesEnable;
     private AudioClip? maskPiggies;
 
+    private ConfigEntry<bool>? redSuckerEnable;
+    private AudioClip? redSucker;
+
     public static class Sounds
     {
         internal static bool FallDeathEnable => Instance is { fallDeathEnable.Value: true };
@@ -61,6 +64,10 @@ public class MySoundReplacements : BaseUnityPlugin
         internal static bool MaskPiggiesEnable => Instance is { maskPiggiesEnable.Value: true };
         internal const string MASK_PIGGIES = "maskPiggies.wav";
         public static AudioClip? MaskPiggies => MaskPiggiesEnable ? Instance.maskPiggies : null;
+
+        internal static bool RedSuckerEnable => Instance is { redSuckerEnable.Value: true };
+        internal const string RED_SUCKER = "redSucker.wav";
+        public static AudioClip? RedSucker => RedSuckerEnable ? Instance.redSucker : null;
     }
 
     private void Awake()
@@ -111,6 +118,12 @@ public class MySoundReplacements : BaseUnityPlugin
             true,
             "Replaces the Mask Hornets sound with the Bad Piggies theme from Angry Birds (the piggies are pretty bad)"
         );
+        redSuckerEnable = Config.Bind(
+            "Sounds",
+            "RedSucker",
+            true,
+            "Replaces the Sapsucker scream sound with the sound of Red from Angry Birds screaming (ya hooya!)"
+        );
 
         Harmony ??= new Harmony(MyPluginInfo.PLUGIN_GUID);
         Logger.LogDebug("Patching...");
@@ -124,6 +137,7 @@ public class MySoundReplacements : BaseUnityPlugin
         mimicDeath = AudioManager.LoadSound(rel(Sounds.MIMIC_DEATH));
         goofyCrash = AudioManager.LoadSound(rel(Sounds.GOOFY_CRASH));
         maskPiggies = AudioManager.LoadSound(rel(Sounds.MASK_PIGGIES));
+        redSucker = AudioManager.LoadSound(rel(Sounds.RED_SUCKER));
         Logger.LogDebug("Finished loading sounds!");
 
         Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
