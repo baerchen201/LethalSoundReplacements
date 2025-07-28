@@ -38,6 +38,9 @@ public class MySoundReplacements : BaseUnityPlugin
     private ConfigEntry<bool>? redSuckerEnable;
     private AudioClip? redSucker;
 
+    private ConfigEntry<bool>? weBeesEnable;
+    private AudioClip? weBees;
+
     public static class Sounds
     {
         internal static bool FallDeathEnable => Instance is { fallDeathEnable.Value: true };
@@ -68,6 +71,10 @@ public class MySoundReplacements : BaseUnityPlugin
         internal static bool RedSuckerEnable => Instance is { redSuckerEnable.Value: true };
         internal const string RED_SUCKER = "redSucker.wav";
         public static AudioClip? RedSucker => RedSuckerEnable ? Instance.redSucker : null;
+
+        internal static bool WeBeesEnable => Instance is { weBeesEnable.Value: true };
+        internal const string WE_BEES = "weBees.wav";
+        public static AudioClip? WeBees => WeBeesEnable ? Instance.weBees : null;
     }
 
     private void Awake()
@@ -124,6 +131,12 @@ public class MySoundReplacements : BaseUnityPlugin
             true,
             "Replaces the Sapsucker scream sound with the sound of Red from Angry Birds screaming (ya hooya!)"
         );
+        weBeesEnable = Config.Bind(
+            "Sounds",
+            "WeBees",
+            true,
+            "Replaces the Circuit Bees angry sound with the we can be bees meme from Invincible (this is good news, Mark)"
+        );
 
         Harmony ??= new Harmony(MyPluginInfo.PLUGIN_GUID);
         Logger.LogDebug("Patching...");
@@ -138,6 +151,7 @@ public class MySoundReplacements : BaseUnityPlugin
         goofyCrash = AudioManager.LoadSound(rel(Sounds.GOOFY_CRASH));
         maskPiggies = AudioManager.LoadSound(rel(Sounds.MASK_PIGGIES));
         redSucker = AudioManager.LoadSound(rel(Sounds.RED_SUCKER));
+        weBees = AudioManager.LoadSound(rel(Sounds.WE_BEES));
         Logger.LogDebug("Finished loading sounds!");
 
         Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
