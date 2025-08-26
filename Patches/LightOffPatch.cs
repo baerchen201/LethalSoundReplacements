@@ -12,15 +12,19 @@ public class LightOffPatch
         var audioClip = MySoundReplacements.Sounds.FreddyFazbear;
         if (audioClip == null)
             return;
-        AudioManager.PlaySingleClipInside(audioClip, audioSource => audioSource.volume = 0.75f);
-        AudioManager.PlaySingleClipInside(
+        AudioManager.PlayClip(
+            audioClip,
+            audioSource => audioSource.volume = 0.75f,
+            _ => GameNetworkManager.Instance?.localPlayerController?.isInsideFactory == true
+        );
+        AudioManager.PlayClip(
             audioClip,
             audioSource =>
             {
                 audioSource.volume = 0.2f;
                 audioSource.gameObject.AddComponent<AudioLowPassFilter>().cutoffFrequency = 2000f;
             },
-            false
+            _ => GameNetworkManager.Instance?.localPlayerController?.isInsideFactory != true
         );
     }
 }

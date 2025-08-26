@@ -9,244 +9,149 @@ namespace MySoundReplacements;
 
 public static class AudioManager
 {
-    public static void PlaySingleClipAt(
+    public static void PlayClip(
         AudioClip clip,
         Vector3 origin,
-        Transform? parentTo = null,
-        Action<AudioSource>? audioSourceModifier = null
+        Action<AudioSource>? audioSourceModifier = null,
+        Func<AudioSource, bool>? muteCondition = null,
+        Func<AudioSource, bool>? stopCondition = null
     )
     {
-        CreateAudioSource(origin, parentTo, out var audioSource, out var audioSourceObject);
+        MySoundReplacements.Logger.LogDebug(
+            $">> PlayClip({clip}, {origin}, {audioSourceModifier}, {muteCondition}, {stopCondition})"
+        );
+        CreateAudioSource(origin, null, out var audioSource);
         audioSourceModifier?.Invoke(audioSource);
-        PlaySingleClipOn(clip, audioSource, audioSourceObject);
+        PlayClipOn(
+            clip,
+            audioSource,
+            _CleanUpAudioSourceGameObject,
+            _CallbackManager(audioSource, muteCondition, stopCondition)
+        );
     }
 
-    public static void PlaySingleClipAt(
+    public static void PlayClip(
         AudioClip clip,
-        Transform origin,
-        Action<AudioSource>? audioSourceModifier = null
+        Transform parentTo,
+        Action<AudioSource>? audioSourceModifier = null,
+        Func<AudioSource, bool>? muteCondition = null,
+        Func<AudioSource, bool>? stopCondition = null
     )
     {
-        CreateAudioSource(origin, out var audioSource, out var audioSourceObject);
+        MySoundReplacements.Logger.LogDebug(
+            $">> PlayClip({clip}, {parentTo}, {audioSourceModifier}, {muteCondition}, {stopCondition})"
+        );
+        CreateAudioSource(parentTo, out var audioSource);
         audioSourceModifier?.Invoke(audioSource);
-        PlaySingleClipOn(clip, audioSource, audioSourceObject);
+        PlayClipOn(
+            clip,
+            audioSource,
+            _CleanUpAudioSourceGameObject,
+            _CallbackManager(audioSource, muteCondition, stopCondition)
+        );
     }
 
-    public static void PlaySingleClipGlobal(
-        AudioClip clip,
-        Action<AudioSource>? audioSourceModifier = null
-    )
-    {
-        CreateAudioSource(Vector3.zero, null, out var audioSource, out var audioSourceObject);
-        audioSourceModifier?.Invoke(audioSource);
-        PlaySingleClipOn(clip, audioSource, audioSourceObject);
-    }
-
-    public static void PlaySingleClipInside(
+    public static void PlayClip(
         AudioClip clip,
         Action<AudioSource>? audioSourceModifier = null,
-        bool inside = true
+        Func<AudioSource, bool>? muteCondition = null,
+        Func<AudioSource, bool>? stopCondition = null
     )
     {
-        CreateAudioSource(Vector3.zero, null, out var audioSource, out var audioSourceObject);
+        MySoundReplacements.Logger.LogDebug(
+            $">> PlayClip({clip}, {audioSourceModifier}, {muteCondition}, {stopCondition})"
+        );
+        CreateAudioSource(default, null, out var audioSource);
         audioSourceModifier?.Invoke(audioSource);
-        PlaySingleClipOnWhen(clip, audioSource, audioSourceObject, _ => IsLocalPlayer(inside));
+        PlayClipOn(
+            clip,
+            audioSource,
+            _CleanUpAudioSourceGameObject,
+            _CallbackManager(audioSource, muteCondition, stopCondition)
+        );
     }
 
-    public static void PlayLoopingClipAt(
-        AudioClip clip,
-        Vector3 origin,
-        Transform? parentTo = null,
-        Action<AudioSource>? audioSourceModifier = null
-    )
-    {
-        CreateAudioSource(origin, parentTo, out var audioSource, out var audioSourceObject);
-        audioSourceModifier?.Invoke(audioSource);
-        PlayLoopingClipOn(clip, audioSource, audioSourceObject);
-    }
-
-    public static void PlayLoopingClipAt(
-        AudioClip clip,
-        Transform origin,
-        Action<AudioSource>? audioSourceModifier = null
-    )
-    {
-        CreateAudioSource(origin, out var audioSource, out var audioSourceObject);
-        audioSourceModifier?.Invoke(audioSource);
-        PlayLoopingClipOn(clip, audioSource, audioSourceObject);
-    }
-
-    public static void PlayLoopingClipAtWhile(
-        AudioClip clip,
-        Func<AudioSource, bool> predicate,
-        Vector3 origin,
-        Transform? parentTo = null,
-        Action<AudioSource>? audioSourceModifier = null
-    )
-    {
-        CreateAudioSource(origin, parentTo, out var audioSource, out var audioSourceObject);
-        audioSourceModifier?.Invoke(audioSource);
-        PlayLoopingClipOnWhile(clip, audioSource, audioSourceObject, predicate);
-    }
-
-    public static void PlayLoopingClipAtWhile(
-        AudioClip clip,
-        Func<AudioSource, bool> predicate,
-        Transform origin,
-        Action<AudioSource>? audioSourceModifier = null
-    )
-    {
-        CreateAudioSource(origin, out var audioSource, out var audioSourceObject);
-        audioSourceModifier?.Invoke(audioSource);
-        PlayLoopingClipOnWhile(clip, audioSource, audioSourceObject, predicate);
-    }
-
-    public static void PlayLoopingClipGlobal(
-        AudioClip clip,
-        Action<AudioSource>? audioSourceModifier = null
-    )
-    {
-        CreateAudioSource(Vector3.zero, null, out var audioSource, out var audioSourceObject);
-        audioSourceModifier?.Invoke(audioSource);
-        PlayLoopingClipOn(clip, audioSource, audioSourceObject);
-    }
-
-    public static void PlayLoopingClipInside(
-        AudioClip clip,
-        Action<AudioSource>? audioSourceModifier = null,
-        bool inside = true
-    )
-    {
-        CreateAudioSource(Vector3.zero, null, out var audioSource, out var audioSourceObject);
-        audioSourceModifier?.Invoke(audioSource);
-        PlayLoopingClipOnWhile(clip, audioSource, audioSourceObject, _ => IsLocalPlayer(inside));
-    }
-
-    private static bool IsLocalPlayer(bool inside) =>
-        GameNetworkManager.Instance != null
-        && GameNetworkManager.Instance.localPlayerController != null
-        && GameNetworkManager.Instance.localPlayerController.isInsideFactory == inside;
-
-    internal static void CreateAudioSource(
+    private static void CreateAudioSource(
         Vector3 origin,
         Transform? parentTo,
-        out AudioSource audioSource,
-        out GameObject audioSourceObject
+        out AudioSource audioSource
     )
     {
-        audioSourceObject = new GameObject();
+        var audioSourceObject = new GameObject();
         audioSource = audioSourceObject.AddComponent<AudioSource>();
         audioSourceObject.transform.position = origin;
         audioSourceObject.transform.parent = parentTo;
     }
 
-    internal static void CreateAudioSource(
-        Transform origin,
-        out AudioSource audioSource,
-        out GameObject audioSourceObject
-    )
+    private static void CreateAudioSource(Transform origin, out AudioSource audioSource)
     {
-        audioSourceObject = new GameObject();
+        var audioSourceObject = new GameObject();
         audioSource = audioSourceObject.AddComponent<AudioSource>();
         audioSourceObject.transform.position = origin.position;
         audioSourceObject.transform.parent = origin;
     }
 
-    public static void PlaySingleClipOn(
-        AudioClip clip,
-        AudioSource audioSource,
-        GameObject audioSourceObject
-    )
+    private static void _CleanUpAudioSourceGameObject(AudioSource audioSource)
     {
-        audioSource.PlayOneShot(clip);
-        MySoundReplacements.Instance.StartCoroutine(
-            _CleanUpAfterPlayingAudio(audioSource, audioSourceObject)
-        );
+        if (audioSource && audioSource.gameObject)
+            Object.Destroy(audioSource.gameObject);
     }
 
-    public static void PlaySingleClipOnWhen(
+    public static void PlayClipOn(
         AudioClip clip,
         AudioSource audioSource,
-        GameObject audioSourceObject,
-        Func<AudioSource, bool> predicate
+        Action<AudioSource>? onDone = null,
+        Action<AudioSource>? update = null
     )
     {
-        audioSource.PlayOneShot(clip);
-        MySoundReplacements.Instance.StartCoroutine(
-            _CleanUpAfterPlayingAudioWhen(audioSource, audioSourceObject, predicate)
+        MySoundReplacements.Logger.LogDebug(
+            $">> PlayClipOn({clip}, {audioSource}, {onDone}, {update})"
         );
-    }
-
-    public static void PlayLoopingClipOn(
-        AudioClip clip,
-        AudioSource audioSource,
-        GameObject audioSourceObject
-    )
-    {
         audioSource.clip = clip;
-        audioSource.loop = true;
-        audioSource.Play();
-        MySoundReplacements.Instance.StartCoroutine(
-            _CleanUpAfterPlayingAudio(audioSource, audioSourceObject)
+        StartOfRound.Instance.StartCoroutine(_PlayingSoundCoroutine(audioSource, onDone, update));
+    }
+
+    private static IEnumerator _PlayingSoundCoroutine(
+        AudioSource audioSource,
+        Action<AudioSource>? onDone,
+        Action<AudioSource>? update
+    )
+    {
+        MySoundReplacements.Logger.LogDebug(
+            $">> PlayingSoundCoroutine({audioSource}, {onDone}, {update})"
         );
-    }
-
-    public static void PlayLoopingClipOnWhile(
-        AudioClip clip,
-        AudioSource audioSource,
-        GameObject audioSourceObject,
-        Func<AudioSource, bool> predicate
-    )
-    {
-        audioSource.clip = clip;
-        audioSource.loop = true;
-        audioSource.Play();
-        MySoundReplacements.Instance.StartCoroutine(
-            _CleanUpAfterPlayingLoopingAudioWhen(audioSource, audioSourceObject, predicate)
-        );
-    }
-
-    private static IEnumerator _CleanUpAfterPlayingAudio(
-        AudioSource audioSource,
-        GameObject cleanUp
-    )
-    {
-        yield return new WaitUntil(() => !audioSource || !audioSource.isPlaying);
-        if (cleanUp)
-            Object.Destroy(cleanUp);
-    }
-
-    private static IEnumerator _CleanUpAfterPlayingAudioWhen(
-        AudioSource audioSource,
-        GameObject cleanUp,
-        Func<AudioSource, bool> predicate
-    )
-    {
-        var volume = audioSource.volume;
-        while (audioSource && audioSource.isPlaying)
+        if (audioSource)
+            audioSource.Play();
+        while (!audioSource || !audioSource.isPlaying)
         {
-            audioSource.volume = predicate(audioSource) ? volume : 0f;
+            update?.Invoke(audioSource);
             yield return null;
         }
-        if (cleanUp)
-            Object.Destroy(cleanUp);
+        onDone?.Invoke(audioSource);
     }
 
-    private static IEnumerator _CleanUpAfterPlayingLoopingAudioWhen(
+    private static Action<AudioSource>? _CallbackManager(
         AudioSource audioSource,
-        GameObject cleanUp,
-        Func<AudioSource, bool> predicate
+        Func<AudioSource, bool>? muteCondition,
+        Func<AudioSource, bool>? stopCondition
     )
     {
-        while (audioSource && audioSource.isPlaying && predicate(audioSource))
-            yield return null;
-        if (cleanUp)
-            Object.Destroy(cleanUp);
+        if (muteCondition == null && stopCondition == null)
+            return null;
+        var volume = audioSource.volume;
+        return _audioSource =>
+        {
+            _audioSource.volume = muteCondition?.Invoke(_audioSource) == true ? 0f : volume;
+            if (stopCondition?.Invoke(_audioSource) == true)
+                _audioSource.Stop();
+        };
     }
+
+    private const string ERR_UNKNOWN_TYPE = "Unknown file type";
 
     public static AudioClip? LoadSound(string path)
     {
-        AudioType audioType = Path.GetExtension(path).ToLower() switch
+        var audioType = Path.GetExtension(path).ToLower() switch
         {
             ".ogg" => AudioType.OGGVORBIS,
             ".mp3" => AudioType.MPEG,
@@ -259,7 +164,12 @@ public static class AudioManager
             $">> LoadSound({Path.GetFullPath(path)}) audioType:{audioType}"
         );
         if (audioType == AudioType.UNKNOWN)
+        {
+            MySoundReplacements.Logger.LogWarning(
+                $"Error loading {Path.GetFullPath(path)}: {ERR_UNKNOWN_TYPE}"
+            );
             return null;
+        }
 
         var webRequest = UnityWebRequestMultimedia.GetAudioClip(path, audioType);
         ((DownloadHandlerAudioClip)webRequest.downloadHandler).streamAudio = !MySoundReplacements
@@ -268,7 +178,7 @@ public static class AudioManager
         webRequest.SendWebRequest();
         while (!webRequest.isDone) { }
 
-        if (webRequest.error != null)
+        if (webRequest.result != UnityWebRequest.Result.Success)
         {
             MySoundReplacements.Logger.LogError(
                 $"Error loading {Path.GetFullPath(path)}: {webRequest.error}"
@@ -287,5 +197,61 @@ public static class AudioManager
             $"Error loading {Path.GetFullPath(path)}: {audioClip.loadState}"
         );
         return null;
+    }
+
+    public static IEnumerator LoadSoundAsync(
+        string path,
+        Action<AudioClip> onSuccess,
+        Action<string?>? onFailure
+    )
+    {
+        var audioType = Path.GetExtension(path).ToLower() switch
+        {
+            ".ogg" => AudioType.OGGVORBIS,
+            ".mp3" => AudioType.MPEG,
+            ".wav" => AudioType.WAV,
+            ".m4a" => AudioType.ACC,
+            ".aiff" => AudioType.AIFF,
+            _ => AudioType.UNKNOWN,
+        };
+        MySoundReplacements.Logger.LogDebug(
+            $">> LoadSound({Path.GetFullPath(path)}) audioType:{audioType}"
+        );
+        if (audioType == AudioType.UNKNOWN)
+        {
+            MySoundReplacements.Logger.LogWarning(
+                $"Error loading {Path.GetFullPath(path)}: {ERR_UNKNOWN_TYPE}"
+            );
+            onFailure?.Invoke(ERR_UNKNOWN_TYPE);
+            yield break;
+        }
+
+        var webRequest = UnityWebRequestMultimedia.GetAudioClip(path, audioType);
+        ((DownloadHandlerAudioClip)webRequest.downloadHandler).streamAudio = !MySoundReplacements
+            .Instance
+            .LoadIntoRAM;
+        yield return webRequest.SendWebRequest();
+
+        if (webRequest.result != UnityWebRequest.Result.Success)
+        {
+            MySoundReplacements.Logger.LogError(
+                $"Error loading {Path.GetFullPath(path)}: {webRequest.error}"
+            );
+            onFailure?.Invoke(webRequest.error);
+            yield break;
+        }
+
+        var audioClip = DownloadHandlerAudioClip.GetContent(webRequest);
+        if (audioClip && audioClip.loadState == AudioDataLoadState.Loaded)
+        {
+            MySoundReplacements.Logger.LogInfo($"Loaded {Path.GetFileName(path)}");
+            onSuccess(audioClip);
+            yield break;
+        }
+
+        MySoundReplacements.Logger.LogWarning(
+            $"Error loading {Path.GetFullPath(path)}: {audioClip.loadState}"
+        );
+        onFailure?.Invoke(null);
     }
 }

@@ -8,15 +8,7 @@ namespace MySoundReplacements.Patches;
 internal class FallDeathPatch
 {
     // ReSharper disable once UnusedMember.Local
-    private static void Postfix(
-        ref PlayerControllerB __instance,
-        ref int playerId,
-        ref bool spawnBody,
-        ref Vector3 bodyVelocity,
-        ref int causeOfDeath,
-        ref int deathAnimation,
-        ref Vector3 positionOffset
-    )
+    private static void Postfix(ref PlayerControllerB __instance, ref int causeOfDeath)
     {
         if (causeOfDeath != (int)CauseOfDeath.Gravity)
             return;
@@ -32,17 +24,19 @@ internal class FallDeathPatch
         if (audioClip == null)
             return;
         if (parentTo)
-            AudioManager.PlaySingleClipAt(audioClip, parentTo!, b);
+            AudioManager.PlayClip(audioClip, parentTo!, b);
         else
-            AudioManager.PlaySingleClipAt(audioClip, origin, null, b);
-    }
+            AudioManager.PlayClip(audioClip, origin, b);
 
-    internal static void b(AudioSource audioSource)
-    {
-        audioSource.maxDistance = 50f;
-        audioSource.volume = 0.5f;
-        audioSource.rolloffMode = AudioRolloffMode.Linear;
-        audioSource.spatialBlend = 1f;
+        return;
+
+        void b(AudioSource audioSource)
+        {
+            audioSource.maxDistance = 50f;
+            audioSource.volume = 0.5f;
+            audioSource.rolloffMode = AudioRolloffMode.Linear;
+            audioSource.spatialBlend = 1f;
+        }
     }
 }
 

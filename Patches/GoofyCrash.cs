@@ -12,7 +12,7 @@ public class GoofyCrashPatch
         var clip = MySoundReplacements.Sounds.GoofyCrash;
         if (!__instance.carDestroyed && clip != null)
         {
-            AudioManager.PlaySingleClipAt(
+            AudioManager.PlayClip(
                 clip,
                 __instance.transform,
                 audioSource =>
