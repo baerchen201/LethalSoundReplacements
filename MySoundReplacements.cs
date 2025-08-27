@@ -1,13 +1,16 @@
+using System;
 using System.IO;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
+using LethalModUtils;
 using UnityEngine;
 
 namespace MySoundReplacements;
 
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+[BepInDependency("baer1.LethalModUtils")]
 public class MySoundReplacements : BaseUnityPlugin
 {
     public static MySoundReplacements Instance { get; private set; } = null!;
@@ -16,6 +19,8 @@ public class MySoundReplacements : BaseUnityPlugin
 
     internal ConfigEntry<bool> loadIntoRAM = null!;
     public bool LoadIntoRAM => loadIntoRAM.Value;
+    internal ConfigEntry<float> loadTimeOut = null!;
+    public TimeSpan LoadTimeOut => TimeSpan.FromSeconds(loadTimeOut.Value);
 
     private ConfigEntry<bool>? fallDeathEnable;
     private AudioClip? fallDeath;
@@ -81,6 +86,12 @@ public class MySoundReplacements : BaseUnityPlugin
             true,
             "Loads the sounds into RAM instead of streaming from disk"
         );
+        loadTimeOut = Config.Bind(
+            "General",
+            "LoadTimeOut",
+            10f,
+            "How long to wait before cancelling a sound load operation"
+        );
 
         fallDeathEnable = Config.Bind(
             "Sounds",
@@ -125,28 +136,30 @@ public class MySoundReplacements : BaseUnityPlugin
             "Replaces the Sapsucker scream sound with the sound of Red from Angry Birds screaming (ya hooya!)"
         );
 
+        Logger.LogDebug("Loading sounds...");
+        fallDeath = Audio.TryLoad(rel(Sounds.FALL_DEATH), LoadTimeOut);
+        freddyFazbear = Audio.TryLoad(rel(Sounds.FREDDY_FAZBEAR), LoadTimeOut);
+        eyeScream = Audio.TryLoad(rel(Sounds.EYE_SCREAM), LoadTimeOut);
+        mimicDeath = Audio.TryLoad(rel(Sounds.MIMIC_DEATH), LoadTimeOut);
+        goofyCrash = Audio.TryLoad(rel(Sounds.GOOFY_CRASH), LoadTimeOut);
+        maskPiggies = Audio.TryLoad(rel(Sounds.MASK_PIGGIES), LoadTimeOut);
+        redSucker = Audio.TryLoad(rel(Sounds.RED_SUCKER), LoadTimeOut);
+        Logger.LogDebug("Finished loading sounds!");
+
         Harmony ??= new Harmony(MyPluginInfo.PLUGIN_GUID);
         Logger.LogDebug("Patching...");
         Harmony.PatchAll();
         Logger.LogDebug("Finished patching!");
 
-        Logger.LogDebug("Loading sounds...");
-        fallDeath = AudioManager.LoadSound(rel(Sounds.FALL_DEATH));
-        freddyFazbear = AudioManager.LoadSound(rel(Sounds.FREDDY_FAZBEAR));
-        eyeScream = AudioManager.LoadSound(rel(Sounds.EYE_SCREAM));
-        mimicDeath = AudioManager.LoadSound(rel(Sounds.MIMIC_DEATH));
-        goofyCrash = AudioManager.LoadSound(rel(Sounds.GOOFY_CRASH));
-        maskPiggies = AudioManager.LoadSound(rel(Sounds.MASK_PIGGIES));
-        redSucker = AudioManager.LoadSound(rel(Sounds.RED_SUCKER));
-        Logger.LogDebug("Finished loading sounds!");
-
         Logger.LogInfo($"{MyPluginInfo.PLUGIN_GUID} v{MyPluginInfo.PLUGIN_VERSION} has loaded!");
     }
 
-    private string rel(string path) =>
-        Path.Combine(
-            Path.GetDirectoryName(GetType().Assembly.Location) ?? string.Empty,
-            "Sounds",
-            path
+    private Uri rel(string path) =>
+        new(
+            Path.Combine(
+                Path.GetDirectoryName(GetType().Assembly.Location) ?? string.Empty,
+                "Sounds",
+                path
+            )
         );
 }

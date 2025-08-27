@@ -1,4 +1,5 @@
 using HarmonyLib;
+using LethalModUtils;
 using UnityEngine;
 
 namespace MySoundReplacements.Patches;
@@ -7,24 +8,29 @@ namespace MySoundReplacements.Patches;
 public class LightOffPatch
 {
     // ReSharper disable once UnusedMember.Local
-    private static void Postfix()
+    private static void Postfix(ref HUDManager __instance)
     {
         var audioClip = MySoundReplacements.Sounds.FreddyFazbear;
         if (audioClip == null)
             return;
-        AudioManager.PlayClip(
-            audioClip,
-            audioSource => audioSource.volume = 0.75f,
-            _ => GameNetworkManager.Instance?.localPlayerController?.isInsideFactory == true
-        );
-        AudioManager.PlayClip(
-            audioClip,
-            audioSource =>
-            {
-                audioSource.volume = 0.2f;
-                audioSource.gameObject.AddComponent<AudioLowPassFilter>().cutoffFrequency = 2000f;
-            },
-            _ => GameNetworkManager.Instance?.localPlayerController?.isInsideFactory != true
-        );
+        audioClip
+            .PlayAt(
+                __instance.transform,
+                player =>
+                {
+                    if (GameNetworkManager.Instance?.localPlayerController?.isInsideFactory == true)
+                    {
+                        player.Volume = 0.75f;
+                        player.BypassEffects = false;
+                    }
+                    else
+                    {
+                        player.Volume = 0.2f;
+                        player.BypassEffects = true;
+                    }
+                }
+            )
+            ._audioSource.gameObject.AddComponent<AudioLowPassFilter>()
+            .cutoffFrequency = 2000f;
     }
 }

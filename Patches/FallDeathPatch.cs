@@ -1,5 +1,6 @@
 using GameNetcodeStuff;
 using HarmonyLib;
+using LethalModUtils;
 using UnityEngine;
 
 namespace MySoundReplacements.Patches;
@@ -23,19 +24,18 @@ internal class FallDeathPatch
         var audioClip = MySoundReplacements.Sounds.FallDeath;
         if (audioClip == null)
             return;
-        if (parentTo)
-            AudioManager.PlayClip(audioClip, parentTo!, b);
-        else
-            AudioManager.PlayClip(audioClip, origin, b);
+        var audioPlayer = parentTo
+            ? audioClip.PlayAt(parentTo!, b)
+            : audioClip.PlayAt(origin, StartOfRound.Instance.transform, b);
+        audioPlayer.SetRange(50f);
+        audioPlayer.Volume = 0.5f;
 
         return;
 
-        void b(AudioSource audioSource)
+        void b(Audio.AudioPlayer player)
         {
-            audioSource.maxDistance = 50f;
-            audioSource.volume = 0.5f;
-            audioSource.rolloffMode = AudioRolloffMode.Linear;
-            audioSource.spatialBlend = 1f;
+            if (player.State != Audio.AudioPlayer.PlayerState.Playing)
+                player.Cancel();
         }
     }
 }

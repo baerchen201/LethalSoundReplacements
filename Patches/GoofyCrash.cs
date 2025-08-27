@@ -1,4 +1,5 @@
 using HarmonyLib;
+using LethalModUtils;
 using UnityEngine;
 
 namespace MySoundReplacements.Patches;
@@ -11,17 +12,6 @@ public class GoofyCrashPatch
     {
         var clip = MySoundReplacements.Sounds.GoofyCrash;
         if (!__instance.carDestroyed && clip != null)
-        {
-            AudioManager.PlayClip(
-                clip,
-                __instance.transform,
-                audioSource =>
-                {
-                    audioSource.maxDistance = 50f;
-                    audioSource.rolloffMode = AudioRolloffMode.Linear;
-                    audioSource.spatialBlend = 1f;
-                }
-            );
-        }
+            clip.PlayAt(__instance.transform).SetRange(50f);
     }
 }
