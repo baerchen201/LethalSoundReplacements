@@ -17,8 +17,6 @@ public class MySoundReplacements : BaseUnityPlugin
     internal static new ManualLogSource Logger { get; private set; } = null!;
     internal static Harmony? Harmony { get; set; }
 
-    internal ConfigEntry<bool> loadIntoRAM = null!;
-    public bool LoadIntoRAM => loadIntoRAM.Value;
     internal ConfigEntry<float> loadTimeOut = null!;
     public TimeSpan LoadTimeOut => TimeSpan.FromSeconds(loadTimeOut.Value);
 
@@ -80,12 +78,6 @@ public class MySoundReplacements : BaseUnityPlugin
         Logger = base.Logger;
         Instance = this;
 
-        loadIntoRAM = Config.Bind(
-            "General",
-            "LoadIntoRAM",
-            true,
-            "Loads the sounds into RAM instead of streaming from disk"
-        );
         loadTimeOut = Config.Bind(
             "General",
             "LoadTimeOut",
