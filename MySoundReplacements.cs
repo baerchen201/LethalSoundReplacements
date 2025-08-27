@@ -103,25 +103,25 @@ public class MySoundReplacements : BaseUnityPlugin
             "Sounds",
             "FreddyFazbear",
             true,
-            "Adds Five Nights at Freddys game over music when pulling apparatus"
+            "Adds Five Nights at Freddy's game over music when pulling apparatus"
         );
         eyeScreamEnable = Config.Bind(
             "Sounds",
             "EyeScream",
             true,
-            "Replaces MouthDog anger sound with Eye Of Cthulhu from Terraria"
+            "Replaces Eyeless Dog anger sound with Eye Of Cthulhu from Terraria"
         );
         mimicDeathEnable = Config.Bind(
             "Sounds",
             "MimicDeath",
             true,
-            "Adds the Mimic death sound with The MIMIICCCC (MR BEASTTTT) (no CLICKBAIT) (REAL!!!!!!) meme from Five Nights at Freddy's"
+            "Adds the Mimic death sound with THE MIMIICCCC (MR BEASTTTT)"
         );
         goofyCrashEnable = Config.Bind(
             "Sounds",
             "GoofyCrash",
             true,
-            "Replaces the cruiser crash sound with Goofy dying while listening to Post Malone (RIP)"
+            "Replaces the cruiser crash sound with Goofy dying while listening to Post Malone"
         );
         maskPiggiesEnable = Config.Bind(
             "Sounds",
