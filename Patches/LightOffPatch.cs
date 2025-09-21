@@ -21,12 +21,12 @@ public class LightOffPatch
                     if (GameNetworkManager.Instance?.localPlayerController?.isInsideFactory == true)
                     {
                         player.Volume = 0.75f;
-                        player.BypassEffects = false;
+                        player.BypassEffects = true;
                     }
                     else
                     {
                         player.Volume = 0.2f;
-                        player.BypassEffects = true;
+                        player.BypassEffects = false;
                     }
                 }
             )
